@@ -1,0 +1,24 @@
+Caso de uso venta 
+
+@startuml
+autonumber
+actor Vendedor
+participant "Interfaz POS" as UI
+participant "Controlador Ventas" as CTRL
+participant "Inventario" as INV
+participant "Pasarela Pagos" as BANK
+
+Vendedor -> UI: Ingresa modelo celular + producto
+UI -> CTRL: Validar stock (Modelo, Accesorio)
+CTRL -> INV: Consultar disponibilidad
+INV --> CTRL: Stock OK
+CTRL --> UI: Producto agregado a la venta
+Vendedor -> UI: Solicita finalizar venta
+UI -> CTRL: Aplicar reglas (Combo Funda + Mica)
+CTRL --> UI: Total recalculado con descuento
+Vendedor -> UI: Procesa pago con tarjeta
+UI -> BANK: Transacción de cobro
+BANK --> UI: Aprobado
+UI -> INV: Actualizar stock (-1)
+UI --> Vendedor: Ticket de compra impreso
+@enduml

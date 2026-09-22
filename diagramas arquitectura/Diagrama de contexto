@@ -1,0 +1,21 @@
+Diagrama de contexto 
+@startuml
+top to bottom direction
+skinparam packageStyle rectangle
+
+actor "Cliente" as C
+actor "Vendedor / Cajero" as V
+actor "Administrador" as A
+actor "Pasarela de Pagos" as P
+actor "Proveedor" as PR
+
+rectangle "Sistema POS Accesorios Celular" {
+    (Sistema Central de Gestión) as SYS
+}
+
+C --> SYS : Consulta compatibilidad y solicita producto
+V --> SYS : Operaciones de caja y garantías
+A --> SYS : Carga catálogo y revisa métricas
+PR --> SYS : Surtido de inventario
+SYS <--> P : Transacciones bancarias
+@enduml

@@ -1,0 +1,27 @@
+Diagrama casos de uso general 
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Vendedor" as V
+actor "Administrador" as A
+actor "Pasarela de Pagos" as P
+
+rectangle "Sistema de Gestión" {
+    usecase "Realizar venta" as UC1
+    usecase "Verificar stock por modelo" as UC2
+    usecase "Procesar pago" as UC3
+    usecase "Aplicar descuento combo" as UC4
+    usecase "Procesar garantía" as UC5
+    usecase "Gestionar inventario" as UC6
+}
+
+V -- UC1
+V -- UC5
+A -- UC6
+
+UC1 .> UC2 : <<include>>
+UC1 .> UC3 : <<include>>
+UC1 <. UC4 : <<extend>>
+UC3 -- P
+@enduml

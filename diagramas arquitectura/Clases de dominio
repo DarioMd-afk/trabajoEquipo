@@ -1,0 +1,44 @@
+Clases de dominio 
+@startuml
+class Producto {
+    +String codigoBarras
+    +String nombre
+    +String categoria
+    +double precioBase
+    +int stockDisponible
+    +consultarStock()
+}
+
+class ModeloTelefono {
+    +String marca
+    +String modelo
+    +String anio
+}
+
+class Venta {
+    +int idVenta
+    +DateTime fecha
+    +double subtotal
+    +double descuento
+    +double total
+    +calcularTotal()
+}
+
+class DetalleVenta {
+    +int cantidad
+    +double precioUnitario
+    +double subtotalLinea
+}
+
+class Garantia {
+    +int idGarantia
+    +String motivo
+    +String estado
+    +validarPlazo()
+}
+
+Producto "*" -- "*" ModeloTelefono : compatibleCon
+Venta "1" *-- "1..*" DetalleVenta
+DetalleVenta "*" -- "1" Producto
+Venta "1" -- "0..1" Garantia
+@enduml

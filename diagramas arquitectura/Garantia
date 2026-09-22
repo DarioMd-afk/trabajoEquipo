@@ -1,0 +1,20 @@
+Garantía 
+
+@startuml
+[*] --> Solicitada : Cliente presenta ticket y accesorio
+
+state Solicitada {
+    [*] --> ValidandoTicket
+    ValidandoTicket --> TicketValido : Dentro de 30 días
+    ValidandoTicket --> Rechazada : Plazo vencido / Sin ticket
+}
+
+Rechazada --> [*] : Solicitud denegada
+
+TicketValido --> InspeccionFisica : Evaluar producto
+InspeccionFisica --> Aprobada : Defecto de fábrica
+InspeccionFisica --> Rechazada : Daño por mal uso (caída/humedad)
+
+Aprobada --> ReemplazoEntregado : Cambio físico por artículo nuevo
+ReemplazoEntregado --> [*]
+@enduml
