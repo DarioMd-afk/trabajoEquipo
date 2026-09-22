@@ -1,0 +1,14 @@
+@startuml
+start
+:Autenticar Administrador / Almacenista;
+if (¿Tipo de tarea?) then (Alta de Producto)
+:Ingresar nombre, código, precio y categoría;
+:Asignar modelos de celulares compatibles;
+else (Reabastecimiento)
+:Escanear código de accesorio existente;
+:Ingresar cantidad de piezas del proveedor;
+endif
+:Guardar registros en la Base de Datos;
+:Desplegar confirmación de inventario actualizado;
+stop
+@enduml

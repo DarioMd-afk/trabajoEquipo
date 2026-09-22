@@ -1,0 +1,19 @@
+@startuml
+start
+:Recibir ticket de compra y accesorio defectuoso;
+:Validar ticket en el sistema ;
+if (¿Venta realizada dentro de 30 días?) then (Sí)
+:Realizar inspección física del producto;
+if (¿El fallo es por defecto de fábrica?) then (Sí)
+    :Aprobar cambio de accesorio;
+    :Entregar producto nuevo del mismo modelo;
+    :Descontar unidad entregada del inventario;
+    :Generar comprobante de cambio;
+else (No)
+    :Rechazar garantía (Daño por mal uso);
+endif
+else (No)
+:Rechazar garantía (Plazo legal vencido);
+endif
+stop
+@enduml

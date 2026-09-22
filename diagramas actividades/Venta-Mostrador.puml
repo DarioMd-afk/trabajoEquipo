@@ -1,0 +1,18 @@
+@startuml
+start
+:Escanear código de barras o seleccionar producto;
+:Verificar disponibilidad de stock (<<include>>);
+if (¿Stock disponible?) then (Sí)
+:Agregar accesorio al carrito de venta;
+if (¿El carrito contiene Funda + Mica?) then (Sí)
+    :Aplicar 15% de descuento en la mica ;
+else (No)
+    :Mantener precios regulares;
+endif
+:Calcular subtotal y total final;
+:Redirigir a Procesar Pago (<<include>>);
+else (No)
+:Desplegar alerta "Producto agotado";
+endif
+stop
+@enduml

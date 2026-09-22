@@ -1,0 +1,20 @@
+@startuml
+start
+:Seleccionar forma de pago;
+if (¿Método de Pago?) then (Tarjeta / Digital)
+:Enviar datos a Pasarela de Pagos;
+if (¿Transacción Aprobada?) then (Sí)
+    :Registrar folio de aprobación;
+else (No)
+    :Ejecutar Transacción Rechazada (<<extend>>);
+    :Solicitar otro método de pago;
+    stop
+endif
+else (Efectivo)
+:Ingresar monto recibido;
+:Calcular y mostrar cambio a entregar;
+endif
+:Descontar existencias del inventario;
+:Emitir e imprimir ticket de compra;
+stop
+@enduml

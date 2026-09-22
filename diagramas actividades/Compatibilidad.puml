@@ -1,0 +1,16 @@
+@startuml
+start
+:Ingresar marca y modelo del teléfono;
+:Buscar accesorios asociados en catálogo;
+if (¿Existen accesorios compatibles?) then (Sí)
+:Filtrar por categoría (Funda, Mica, Cable);
+if (¿Hay stock disponible?) then (Sí)
+    :Mostrar accesorios con precio y ubicación;
+else (No)
+    :Mostrar "Sin stock" y sugerir alternativos;
+endif
+else (No)
+:Notificar "Modelo no registrado";
+endif
+stop
+@enduml
