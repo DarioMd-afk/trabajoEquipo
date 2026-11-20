@@ -1,0 +1,70 @@
+:root {
+    --bg-dark: #0d1612;
+    --bg-card: #14211b;
+    --border-soft: #23382e;
+    --accent-mint: #2de1a0;
+    --accent-amber: #f5a623;
+    --text-main: #edf5f0;
+    --text-muted: #8ea699;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.card-myphone {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+}
+
+.navbar-myphone {
+    background-color: #09100d;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.btn-mint {
+    background-color: var(--accent-mint);
+    color: #062116;
+    font-weight: 600;
+    border: none;
+}
+
+.btn-mint:hover {
+    background-color: #24c68b;
+    color: #062116;
+}
+
+.btn-amber {
+    background-color: var(--accent-amber);
+    color: #1f1402;
+    font-weight: 600;
+    border: none;
+}
+
+.btn-amber:hover {
+    background-color: #de941c;
+    color: #1f1402;
+}
+
+.form-control, .form-select {
+    background-color: #0f1a15;
+    border: 1px solid var(--border-soft);
+    color: var(--text-main);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #0f1a15;
+    color: var(--text-main);
+    border-color: var(--accent-mint);
+    box-shadow: none;
+}
+
+.table-myphone {
+    color: var(--text-main);
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-main);
+    --bs-table-border-color: var(--border-soft);
+}
