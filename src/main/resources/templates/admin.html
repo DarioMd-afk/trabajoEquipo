@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Admin - My Phone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/myphone.css}">
+</head>
+<body>
+<nav class="navbar navbar-myphone px-4 py-3 mb-4">
+    <span class="navbar-brand text-white fw-bold">📱 My Phone · Panel Administrador</span>
+    <div class="d-flex gap-2">
+        <a href="/" class="btn btn-outline-light btn-sm">Catálogo</a>
+        <a href="/carrito" class="btn btn-outline-light btn-sm">Caja POS</a>
+        <a href="/garantias" class="btn btn-outline-light btn-sm">Garantías</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card-myphone p-3">
+                <small class="text-secondary">Productos registrados</small>
+                <h3 class="mt-1 mb-0" th:text="${#lists.size(productos)}">0</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-myphone p-3">
+                <small class="text-secondary">Stock bajo (≤ 5 pzas)</small>
+                <h3 class="mt-1 mb-0 text-warning" th:text="${totalStockBajo} + ' SKU'">0 SKU</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-myphone p-3">
+                <small class="text-secondary">Sucursal</small>
+                <h5 class="mt-2 mb-0 text-success">Atlacomulco</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Alta de producto -->
+        <div class="col-md-4">
+            <div class="card-myphone p-4">
+                <h5 class="mb-3">+ Nuevo producto</h5>
+                <form th:action="@{/admin/productos/guardar}" th:object="${nuevoProducto}" method="post">
+                    <div class="mb-2">
+                        <label class="form-label small">Código / SKU</label>
+                        <input type="text" th:field="*{codigoBarras}" class="form-control" placeholder="SKU-1042" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Nombre</label>
+                        <input type="text" th:field="*{nombre}" class="form-control" placeholder="Ej. Funda MagSafe, PopSocket, Bocina..." required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Categoría</label>
+                        <select th:field="*{categoria}" class="form-select">
+                            <option value="Fundas">Fundas para celular</option>
+                            <option value="Micas">Micas</option>
+                            <option value="Fundas para audífonos">Fundas para audífonos</option>
+                            <option value="Cargadores">Cargadores</option>
+                            <option value="Cables">Cables</option>
+                            <option value="Bocinas">Bocinas</option>
+                            <option value="Accesorios">Accesorios (Ventosas, Pulseras, PopSockets, Soportes)</option>
+                            <option value="Combos">Combos (Smartwatch + Correas / Audífonos)</option>
+                        </select>
+                    </div>
+
+                    <!-- Selector de Marca + Boton Nueva Marca -->
+                    <div class="mb-2">
+                        <label class="form-label small">Marca compatible</label>
+                        <div class="d-flex gap-1">
+                            <select id="selectMarca" class="form-select form-select-sm" onchange="actualizarModelos()">
+                                <option th:each="m : ${marcas}" th:value="${m.nombre}" th:text="${m.nombre}"></option>
+                            </select>
+                            <button type="button" class="btn btn-outline-warning btn-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalNuevaMarca">
+                                + Nueva
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Selector de Modelo + Boton Agregar -->
+                    <div class="mb-2">
+                        <label class="form-label small">Modelo (selecciona y agrega)</label>
+                        <div class="d-flex gap-1">
+                            <select id="selectModelo" class="form-select form-select-sm"></select>
+                            <button type="button" class="btn btn-mint btn-sm text-nowrap" onclick="agregarModelo()">
+                                + Agregar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small">Modelos compatibles seleccionados</label>
+                        <input type="text" id="inputModelosCompatibles" th:field="*{modelosCompatibles}" class="form-control form-control-sm"
+                            placeholder="Usa + Agregar o escribe aquí..." required>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label small">Precio ($)</label>
+                            <input type="number" step="0.01" th:field="*{precioBase}" class="form-control" required>
+                        </div>
+                        <div class="col">
+                            <label class="form-label small">Stock inicial</label>
+                            <input type="number" th:field="*{stockDisponible}" class="form-control" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-amber w-100">Guardar producto</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla de inventario -->
+        <div class="col-md-8">
+            <div class="card-myphone p-4">
+                <h5 class="mb-3">Inventario actual</h5>
+                <table class="table table-myphone align-middle">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Modelos</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Surtir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${productos}">
+                            <td>
+                                <strong th:text="${p.nombre}">Funda</strong><br>
+                                <small class="text-secondary" th:text="${p.codigoBarras}">SKU</small>
+                            </td>
+                            <td th:text="${p.categoria}">Fundas</td>
+                            <td th:text="${p.modelosCompatibles}">iPhone 15</td>
+                            <td th:text="'$' + ${p.precioBase}">$349</td>
+                            <td>
+                                <span class="badge" th:classappend="${p.stockDisponible <= 5} ? 'bg-danger' : 'bg-success'"
+                                    th:text="${p.stockDisponible}">10</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/productos/reabastecer}" method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="id" th:value="${p.id}">
+                                    <input type="number" name="cantidad" value="5" min="1" class="form-control form-control-sm" style="width:65px">
+                                    <button type="submit" class="btn btn-mint btn-sm">+Sumar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(productos)}">
+                            <td colspan="6" class="text-center text-secondary py-4">Agrega tu primer producto a la izquierda.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana emergente para agregar una Marca nueva -->
+<div class="modal fade" id="modalNuevaMarca" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content card-myphone text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">Agregar nueva marca</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/admin/marcas/guardar}" method="post">
+                <div class="modal-body">
+                    <label class="form-label small">Nombre de la marca</label>
+                    <input type="text" name="nombreMarca" class="form-control" placeholder="Ej. Realme, Poco, JBL, Sony..." required>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-mint btn-sm">Guardar marca</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const modelosPorMarca = {
+        "Apple": ["iPhone 13", "iPhone 14", "iPhone 15", "iPhone 15 Pro", "iPhone 16", "iPhone 16 Pro Max", "AirPods 3", "AirPods Pro 2"],
+        "Samsung": ["Galaxy S23", "Galaxy S24", "Galaxy S24 Ultra", "Galaxy A54", "Galaxy A55", "Galaxy Buds 2 Pro"],
+        "Xiaomi": ["Redmi Note 12", "Redmi Note 13", "Redmi Note 13 Pro", "Xiaomi 14", "Redmi Buds 5"],
+        "Motorola": ["Moto G54", "Moto G84", "Edge 40", "Edge 50 Pro"],
+        "Huawei": ["Nova 11", "Nova 12", "P60 Pro", "FreeBuds 5i"],
+        "Honor": ["Honor 90", "Honor Magic 6", "Honor X8b"],
+        "Oppo": ["Reno 10", "Reno 11", "Oppo A78"],
+        "Universal": ["Universal (iOS / Android)", "Universal (Bluetooth)", "Universal (USB-C)", "Universal (Cualquier celular)"]
+    };
+
+    function actualizarModelos() {
+        const marca = document.getElementById("selectMarca").value;
+        const selectModelo = document.getElementById("selectModelo");
+        const lista = modelosPorMarca[marca] || ["Todos los modelos", "Universal"];
+        selectModelo.innerHTML = "";
+        lista.forEach(mod => {
+            const opt = document.createElement("option");
+            opt.value = mod;
+            opt.textContent = mod;
+            selectModelo.appendChild(opt);
+        });
+    }
+
+    function agregarModelo() {
+        const marca = document.getElementById("selectMarca").value;
+        const modelo = document.getElementById("selectModelo").value;
+        const input = document.getElementById("inputModelosCompatibles");
+        const texto = marca === "Universal" ? modelo : (marca + " " + modelo);
+        if (input.value.trim() === "") {
+            input.value = texto;
+        } else if (!input.value.includes(texto)) {
+            input.value += ", " + texto;
+        }
+    }
+
+    // Cargar modelos al abrir la pagina
+    actualizarModelos();
+</script>
+</body>
+</html>
