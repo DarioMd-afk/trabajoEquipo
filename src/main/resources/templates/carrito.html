@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Caja POS - My Phone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/myphone.css}">
+</head>
+<body>
+<nav class="navbar navbar-myphone px-4 py-3 mb-4">
+    <span class="navbar-brand text-white fw-bold">📱 My Phone · Caja POS</span>
+    <div class="d-flex gap-2">
+        <a href="/" class="btn btn-outline-light btn-sm">Catálogo</a>
+        <a href="/garantias" class="btn btn-outline-light btn-sm">Garantías</a>
+        <a href="/admin" class="btn btn-outline-warning btn-sm">Admin</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row g-4">
+        <div class="col-md-7">
+            <div class="card-myphone p-4 mb-3">
+                <form th:action="@{/carrito/agregar}" method="post" class="d-flex gap-2">
+                    <input type="text" name="codigoBarras" class="form-control" placeholder="Escanea o escribe el Código / SKU..." required>
+                    <button type="submit" class="btn btn-mint">Agregar</button>
+                </form>
+            </div>
+            <div class="card-myphone p-4">
+                <h5 class="mb-3">Productos en caja</h5>
+                <table class="table table-myphone">
+                    <thead><tr><th>SKU</th><th>Producto</th><th>Precio</th></tr></thead>
+                    <tbody>
+                        <tr th:each="item : ${carrito}">
+                            <td th:text="${item.codigoBarras}"></td>
+                            <td th:text="${item.nombre}"></td>
+                            <td th:text="'$' + ${item.precioBase}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card-myphone p-4">
+                <h5>Resumen de cobro</h5>
+                <p class="mb-1">Subtotal: <strong th:text="'$' + ${subtotal}">$0</strong></p>
+                <p class="mb-1 text-success">Descuento Combo (15% al llevar 2+): <strong th:text="'-$' + ${descuento}">$0</strong></p>
+                <h3 class="text-warning my-3">Total: <span th:text="'$' + ${total}">$0</span></h3>
+                <form th:action="@{/carrito/cobrar}" method="post" class="mb-2">
+                    <button type="submit" class="btn btn-amber w-100">Cobrar y generar ticket</button>
+                </form>
+                <form th:action="@{/carrito/vaciar}" method="post">
+                    <button type="submit" class="btn btn-outline-danger w-100 btn-sm">Vaciar caja</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
