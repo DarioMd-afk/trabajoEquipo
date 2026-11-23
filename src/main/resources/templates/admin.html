@@ -18,6 +18,16 @@
 </nav>
 
 <div class="container">
+    <!-- Alertas de validacion y manejo de errores -->
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${mensajeError}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${mensajeExito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
     <div class="row g-3 mb-4">
         <div class="col-md-4">
             <div class="card-myphone p-3">
@@ -138,7 +148,7 @@
                             <td th:text="'$' + ${p.precioBase}">$349</td>
                             <td>
                                 <span class="badge" th:classappend="${p.stockDisponible <= 5} ? 'bg-danger' : 'bg-success'"
-                                    th:text="${p.stockDisponible}">10</span>
+                                      th:text="${p.stockDisponible}">10</span>
                             </td>
                             <td>
                                 <form th:action="@{/admin/productos/reabastecer}" method="post" class="d-flex gap-1">

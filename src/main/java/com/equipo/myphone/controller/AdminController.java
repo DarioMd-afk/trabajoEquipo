@@ -1,19 +1,15 @@
 package com.equipo.myphone.controller;
 
-import java.util.List;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import com.equipo.myphone.model.Marca;
 import com.equipo.myphone.model.Producto;
 import com.equipo.myphone.repository.MarcaRepository;
 import com.equipo.myphone.repository.ProductoRepository;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -29,47 +25,66 @@ public class AdminController {
 
     @GetMapping
     public String panelAdmin(Model model) {
-        // Si la tabla de marcas esta vacia, carga las marcas base automaticamente
         if (marcaRepository.count() == 0) {
-            for (String nombre : List.of("Apple", "Samsung", "Xiaomi", "Motorola", "Huawei", "Honor", "Oppo", "Universal")) {
+            List<String> marcasBase = List.of("Apple", "Samsung", "Xiaomi", "Motorola", "Huawei", "Honor", "Oppo", "Universal");
+            for (String nombre : marcasBase) {
                 Marca m = new Marca();
                 m.setNombre(nombre);
                 marcaRepository.save(m);
             }
         }
 
-        var productos = productoRepository.findAll();
-        var stockBajo = productoRepository.findByStockDisponibleLessThanEqual(5);
+        List<Producto> productos = productoRepository.findAll();
+        long totalStockBajo = productos.stream()
+                .filter(p -> p.getStockDisponible() != null && p.getStockDisponible() <= 5)
+                .count();
+
         model.addAttribute("productos", productos);
         model.addAttribute("marcas", marcaRepository.findAll());
-        model.addAttribute("totalStockBajo", stockBajo.size());
+        model.addAttribute("totalStockBajo", totalStockBajo);
         model.addAttribute("nuevoProducto", new Producto());
         return "admin";
     }
 
     @PostMapping("/productos/guardar")
-    public String guardarProducto(@ModelAttribute Producto producto) {
-        productoRepository.save(producto);
+    public String guardarProducto(@ModelAttribute Producto nuevoProducto, RedirectAttributes redirectAttributes) {
+        try {
+            productoRepository.save(nuevoProducto);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Producto guardado correctamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al guardar: el código SKU ya existe o los datos son inválidos.");
+        } finally {
+            System.out.println("Finalizó el intento de registro para SKU: " + nuevoProducto.getCodigoBarras());
+        }
         return "redirect:/admin";
     }
 
     @PostMapping("/productos/reabastecer")
-    public String reabastecer(@RequestParam Long id, @RequestParam Integer cantidad) {
-        Producto p = productoRepository.findById(id).orElse(null);
-        if (p != null && cantidad > 0) {
+    public String reabastecerProducto(@RequestParam Long id, @RequestParam Integer cantidad, RedirectAttributes redirectAttributes) {
+        try {
+            Producto p = productoRepository.findById(id).orElseThrow();
             p.setStockDisponible(p.getStockDisponible() + cantidad);
             productoRepository.save(p);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Stock actualizado correctamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al actualizar el stock.");
+        } finally {
+            System.out.println("Finalizó el intento de reabastecimiento para ID: " + id);
         }
         return "redirect:/admin";
     }
 
     @PostMapping("/marcas/guardar")
-    public String guardarMarca(@RequestParam String nombreMarca) {
-        String limpia = nombreMarca.trim();
-        if (!limpia.isEmpty() && !marcaRepository.existsByNombreIgnoreCase(limpia)) {
+    public String guardarMarca(@RequestParam String nombreMarca, RedirectAttributes redirectAttributes) {
+        try {
             Marca nueva = new Marca();
-            nueva.setNombre(limpia);
+            nueva.setNombre(nombreMarca.trim());
             marcaRepository.save(nueva);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Marca agregada correctamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al guardar la marca (puede que ya exista).");
+        } finally {
+            System.out.println("Finalizó el intento de registro de marca: " + nombreMarca);
         }
         return "redirect:/admin";
     }
