@@ -12,6 +12,7 @@
     <div class="d-flex gap-2">
         <a href="/" class="btn btn-outline-light btn-sm">Catálogo</a>
         <a href="/carrito" class="btn btn-outline-light btn-sm">Caja POS</a>
+        <a href="/facturas" class="btn btn-outline-light btn-sm">Facturas</a>
         <a href="/garantias" class="btn btn-outline-light btn-sm">Garantías</a>
     </div>
 </nav>
@@ -93,7 +94,7 @@
                     <div class="mb-2">
                         <label class="form-label small">Modelos compatibles seleccionados</label>
                         <input type="text" id="inputModelosCompatibles" th:field="*{modelosCompatibles}" class="form-control form-control-sm"
-                            placeholder="Usa + Agregar o escribe aquí..." required>
+                               placeholder="Usa + Agregar o escribe aquí..." required>
                     </div>
 
                     <div class="row mb-3">
@@ -217,7 +218,6 @@
         }
     }
 
-    // Cargar modelos al abrir la pagina
     actualizarModelos();
 </script>
 </body>

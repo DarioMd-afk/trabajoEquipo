@@ -62,7 +62,7 @@ public class PosController {
                     dbProd.setStockDisponible(dbProd.getStockDisponible() - 1);
                     productoRepository.save(dbProd);
                 }
-                detalle.append(item.getNombre()).append(", ");
+            detalle.append(item.getNombre()).append(" [SKU: ").append(item.getCodigoBarras()).append("], ");
             }
 
             Venta v = new Venta();

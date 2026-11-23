@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Facturas - My Phone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/myphone.css}">
+</head>
+<body>
+<nav class="navbar navbar-myphone px-4 py-3 mb-4">
+    <span class="navbar-brand text-white fw-bold">🧾 My Phone · Historial de Facturas</span>
+    <div class="d-flex gap-2">
+        <a href="/" class="btn btn-outline-light btn-sm">Catálogo</a>
+        <a href="/carrito" class="btn btn-outline-light btn-sm">Caja POS</a>
+        <a href="/garantias" class="btn btn-outline-light btn-sm">Garantías</a>
+        <a href="/admin" class="btn btn-outline-warning btn-sm">Admin</a>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Tarjetas de resumen -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card-myphone p-3">
+                <small class="text-secondary">Facturas / Tickets emitidos</small>
+                <h3 class="mt-1 mb-0" th:text="${#lists.size(facturas)}">0</h3>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-myphone p-3">
+                <small class="text-secondary">Ingresos acumulados</small>
+                <h3 class="mt-1 mb-0 text-warning" th:text="'$' + ${#numbers.formatDecimal(totalVendido, 1, 2)}">$0.00</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Columna izquierda: Historial de Facturas -->
+        <div class="col-md-8">
+            <div class="card-myphone p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Historial de Tickets</h5>
+                    <input type="text" id="buscarFactura" class="form-control form-control-sm w-50"
+                           placeholder="Buscar por folio, producto o SKU..." onkeyup="filtrarFacturas()">
+                </div>
+
+                <table class="table table-myphone align-middle" id="tablaFacturas">
+                    <thead>
+                        <tr>
+                            <th>Folio</th>
+                            <th>Fecha</th>
+                            <th>Productos / SKU</th>
+                            <th>Total</th>
+                            <th>Ticket</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="f : ${facturas}">
+                            <td><strong th:text="'#' + ${f.id}">#1</strong></td>
+                            <td class="small text-secondary"
+                                th:text="${f.fecha != null} ? ${#temporals.format(f.fecha, 'dd/MM/yyyy HH:mm')} : 'Sin fecha'"></td>
+                            <td th:text="${f.detalleProductos}">Productos</td>
+                            <td class="text-warning fw-bold" th:text="'$' + ${f.total}">$0</td>
+                            <td>
+                                <button type="button" class="btn btn-outline-light btn-sm"
+                                        th:attr="data-folio=${f.id}, data-fecha=${f.fecha != null ? #temporals.format(f.fecha, 'dd/MM/yyyy HH:mm') : ''}, data-detalle=${f.detalleProductos}, data-sub=${f.subtotal}, data-desc=${f.descuento}, data-tot=${f.total}"
+                                        onclick="verTicket(this)">
+                                    Ver
+                                </button>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(facturas)}">
+                            <td colspan="5" class="text-center text-secondary py-4">
+                                Todavía no hay ventas registradas en Caja POS.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Columna derecha: Consulta rápida de SKU para Garantías -->
+        <div class="col-md-4">
+            <div class="card-myphone p-4">
+                <h5 class="mb-2">🔎 Buscador rápido de SKU</h5>
+                <small class="text-secondary d-block mb-3">Copia el código en 1 clic para pegarlo en Garantías.</small>
+
+                <input type="text" id="buscarSku" class="form-control form-control-sm mb-3"
+                       placeholder="Ej. funda, goku, bocina..." onkeyup="filtrarSkus()">
+
+                <div style="max-height: 400px; overflow-y: auto;" id="listaSkus">
+                    <div class="d-flex justify-content-between align-items-center border-bottom border-secondary py-2 item-sku"
+                         th:each="p : ${productos}">
+                        <div class="me-2">
+                            <div class="small fw-bold" th:text="${p.nombre}">Producto</div>
+                            <small class="text-warning" th:text="'SKU: ' + ${p.codigoBarras}">SKU</small>
+                        </div>
+                        <button type="button" class="btn btn-mint btn-sm text-nowrap"
+                                th:attr="data-sku=${p.codigoBarras}"
+                                onclick="copiarSku(this)">
+                            Copiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Vista Previa de Ticket -->
+<div class="modal fade" id="modalTicket" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content card-myphone text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">🧾 Ticket My Phone <span id="tFolio"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-secondary mb-1">Sucursal Atlacomulco · <span id="tFecha"></span></p>
+                <hr class="border-secondary">
+                <p class="mb-2"><strong>Detalle:</strong><br><span id="tDetalle"></span></p>
+                <hr class="border-secondary">
+                <p class="mb-1">Subtotal: $<span id="tSub"></span></p>
+                <p class="mb-1 text-success">Descuento: -$<span id="tDesc"></span></p>
+                <h4 class="text-warning mt-2">Total pagado: $<span id="tTot"></span></h4>
+            </div>
+            <div class="modal-footer border-secondary">
+                <a href="/garantias" class="btn btn-amber btn-sm">Ir a Garantías</a>
+                <button type="button" class="btn btn-outline-light btn-sm" onclick="window.print()">Imprimir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function filtrarFacturas() {
+        const texto = document.getElementById("buscarFactura").value.toLowerCase();
+        document.querySelectorAll("#tablaFacturas tbody tr").forEach(fila => {
+            fila.style.display = fila.innerText.toLowerCase().includes(texto) ? "" : "none";
+        });
+    }
+
+    function filtrarSkus() {
+        const texto = document.getElementById("buscarSku").value.toLowerCase();
+        document.querySelectorAll(".item-sku").forEach(item => {
+            item.style.display = item.innerText.toLowerCase().includes(texto) ? "flex" : "none";
+        });
+    }
+
+    function copiarSku(btn) {
+        const sku = btn.getAttribute("data-sku");
+        navigator.clipboard.writeText(sku);
+        const textoOriginal = btn.innerText;
+        btn.innerText = "✓ Copiado";
+        setTimeout(() => btn.innerText = textoOriginal, 1500);
+    }
+
+    function verTicket(btn) {
+        document.getElementById("tFolio").innerText = "#" + btn.getAttribute("data-folio");
+        document.getElementById("tFecha").innerText = btn.getAttribute("data-fecha");
+        document.getElementById("tDetalle").innerText = btn.getAttribute("data-detalle");
+        document.getElementById("tSub").innerText = btn.getAttribute("data-sub");
+        document.getElementById("tDesc").innerText = btn.getAttribute("data-desc");
+        document.getElementById("tTot").innerText = btn.getAttribute("data-tot");
+        new bootstrap.Modal(document.getElementById("modalTicket")).show();
+    }
+</script>
+</body>
+</html>
